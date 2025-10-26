@@ -1,0 +1,1785 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bible Learning Center</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Georgia', serif;
+        }
+        .bible-verse {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .game-card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .donation-glow {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        .quiz-option:hover {
+            background-color: #f3f4f6;
+        }
+        .correct-answer {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+        }
+        .wrong-answer {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+        }
+        .achievement-badge {
+            transition: all 0.3s ease;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="min-h-full bg-gradient-to-br from-blue-50 to-purple-50">
+  <div class="container mx-auto px-4 py-6 max-w-6xl"><!-- Header -->
+   <header class="text-center mb-8">
+    <h1 id="app-title" class="text-4xl font-bold text-gray-800 mb-2">Bible Learning Center</h1>
+    <p id="welcome-message" class="text-lg text-gray-600">Welcome to your Bible study journey</p>
+   </header><!-- Navigation -->
+   <nav class="flex flex-wrap justify-center gap-4 mb-8"><button onclick="showSection('study')" class="nav-btn bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"> 📖 Bible Study </button> <button onclick="showSection('quiz')" class="nav-btn bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"> ❓ Quiz Time </button> <button onclick="showSection('games')" class="nav-btn bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"> 🎮 Bible Games </button> <button onclick="showSection('donate')" class="nav-btn bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors"> 💝 Donate </button> <button onclick="showSection('videos')" class="nav-btn bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"> 📺 Videos </button> <button onclick="showSection('profile')" class="nav-btn bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"> 👤 My Profile </button>
+   </nav><!-- Bible Study Section -->
+   <section id="study-section" class="section block">
+    <div class="grid md:grid-cols-2 gap-6"><!-- Bible Reading -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">📖 Read the Bible</h2>
+      <div class="space-y-4">
+       <div><label class="block text-sm font-medium mb-2">Choose Testament:</label> <select id="testament-select" class="w-full p-2 border rounded-lg" onchange="loadBooks()"> <option value="old">Old Testament</option> <option value="new">New Testament</option> </select>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Choose Book:</label> <select id="book-select" class="w-full p-2 border rounded-lg" onchange="loadChapters()"> <option value="">Select a book...</option> </select>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Chapter:</label> <select id="chapter-select" class="w-full p-2 border rounded-lg" onchange="loadVerses()"> <option value="">Select chapter...</option> </select>
+       </div><button onclick="readChapter()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"> Read Chapter </button>
+      </div>
+     </div><!-- Daily Verse -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-4 text-gray-800">✨ Verse of the Day</h2>
+      <div class="bible-verse text-white p-4 rounded-lg text-center">
+       <p class="text-lg mb-2" id="daily-verse">"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."</p>
+       <p class="text-sm opacity-90" id="verse-reference">John 3:16</p>
+      </div><button onclick="saveVerse()" class="w-full mt-4 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"> 💖 Save as Favorite </button>
+     </div>
+    </div><!-- Bible Text Display -->
+    <div id="bible-text" class="mt-6 bg-white rounded-lg shadow-lg p-6 hidden">
+     <h3 id="chapter-title" class="text-xl font-bold mb-4"></h3>
+     <div id="verses-container" class="space-y-2 text-gray-700 leading-relaxed"></div>
+    </div>
+   </section><!-- Quiz Section -->
+   <section id="quiz-section" class="section hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+     <h2 class="text-2xl font-bold mb-4 text-gray-800">❓ Bible Knowledge Quiz</h2>
+     <div id="quiz-container">
+      <div id="quiz-question" class="mb-6">
+       <h3 class="text-lg font-semibold mb-4" id="question-text">Who built the ark?</h3>
+       <div class="space-y-2" id="quiz-options"><button class="quiz-option w-full text-left p-3 border rounded-lg" onclick="selectAnswer(this, true)">Noah</button> <button class="quiz-option w-full text-left p-3 border rounded-lg" onclick="selectAnswer(this, false)">Moses</button> <button class="quiz-option w-full text-left p-3 border rounded-lg" onclick="selectAnswer(this, false)">David</button> <button class="quiz-option w-full text-left p-3 border rounded-lg" onclick="selectAnswer(this, false)">Abraham</button>
+       </div>
+      </div>
+      <div class="flex justify-between items-center">
+       <div class="text-sm text-gray-600">
+        Score: <span id="quiz-score">0</span> / <span id="quiz-total">0</span>
+       </div><button onclick="nextQuestion()" id="next-btn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50" disabled> Next Question </button>
+      </div>
+     </div>
+    </div>
+   </section><!-- Games Section -->
+   <section id="games-section" class="section hidden">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">🎮 Bible Games</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Memory Game -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startMemoryGame()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        🧠
+       </div>
+       <h3 class="text-xl font-bold mb-2">Memory Match</h3>
+       <p class="text-gray-600">Match Bible characters and their stories</p>
+      </div>
+     </div><!-- Word Search -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startWordSearch()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        🔍
+       </div>
+       <h3 class="text-xl font-bold mb-2">Word Search</h3>
+       <p class="text-gray-600">Find hidden Bible words</p>
+      </div>
+     </div><!-- Bible Trivia -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startTrivia()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        🎯
+       </div>
+       <h3 class="text-xl font-bold mb-2">Bible Trivia</h3>
+       <p class="text-gray-600">Test your Bible knowledge</p>
+      </div>
+     </div><!-- Verse Scramble -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startVerseScramble()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        🔤
+       </div>
+       <h3 class="text-xl font-bold mb-2">Verse Scramble</h3>
+       <p class="text-gray-600">Unscramble Bible verses</p>
+      </div>
+     </div><!-- Bible Bingo -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startBingo()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        🎲
+       </div>
+       <h3 class="text-xl font-bold mb-2">Bible Bingo</h3>
+       <p class="text-gray-600">Play bingo with Bible terms</p>
+      </div>
+     </div><!-- Timeline Game -->
+     <div class="game-card bg-white rounded-lg shadow-lg p-6 cursor-pointer" onclick="startTimeline()">
+      <div class="text-center">
+       <div class="text-4xl mb-4">
+        ⏰
+       </div>
+       <h3 class="text-xl font-bold mb-2">Timeline</h3>
+       <p class="text-gray-600">Order Biblical events</p>
+      </div>
+     </div>
+    </div><!-- Game Area -->
+    <div id="game-area" class="mt-8 bg-white rounded-lg shadow-lg p-6 hidden">
+     <div class="flex justify-between items-center mb-4">
+      <h3 id="game-title" class="text-xl font-bold"></h3><button onclick="closeGame()" class="text-gray-500 hover:text-gray-700">✕</button>
+     </div>
+     <div id="game-content"></div>
+    </div>
+   </section><!-- Donation Section -->
+   <section id="donate-section" class="section hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+     <h2 id="donation-title" class="text-2xl font-bold mb-4 text-gray-800 text-center">💝 Help Children in Need</h2>
+     <p id="donation-message" class="text-center text-gray-600 mb-6">Your donation helps provide for children in need</p>
+     <div class="max-w-md mx-auto">
+      <div class="donation-glow bg-gradient-to-r from-green-400 to-blue-500 p-6 rounded-lg text-white text-center mb-6">
+       <h3 class="text-xl font-bold mb-2">Donation Account</h3>
+       <p class="text-lg">Account: <strong>907108381</strong></p>
+       <p class="text-lg">Bank: <strong>Opay</strong></p>
+       <p class="text-lg">Name: <strong>Edwin DOREGOS</strong></p>
+      </div>
+      <div class="space-y-4">
+       <div><label class="block text-sm font-medium mb-2">Suggested Amount:</label>
+        <div class="grid grid-cols-3 gap-2"><button onclick="setAmount(1000)" class="bg-gray-100 hover:bg-gray-200 p-2 rounded text-center">₦1,000</button> <button onclick="setAmount(2500)" class="bg-gray-100 hover:bg-gray-200 p-2 rounded text-center">₦2,500</button> <button onclick="setAmount(5000)" class="bg-gray-100 hover:bg-gray-200 p-2 rounded text-center">₦5,000</button>
+        </div>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Custom Amount:</label> <input type="number" id="donation-amount" class="w-full p-2 border rounded-lg" placeholder="Enter amount in Naira">
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Your Name (Optional):</label> <input type="text" id="donor-name" class="w-full p-2 border rounded-lg" placeholder="Your name">
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Prayer Request (Optional):</label> <textarea id="prayer-request" class="w-full p-2 border rounded-lg h-20" placeholder="Share your prayer request..."></textarea>
+       </div><button onclick="recordDonation()" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"> 🙏 Record My Donation Intent </button>
+      </div>
+      <div class="mt-6 text-center text-sm text-gray-600">
+       <p>Please transfer to the account above and record your donation here for our prayers and gratitude.</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- Videos Section -->
+   <section id="videos-section" class="section hidden">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">📺 Educational Bible Videos</h2><!-- The Bible Project Videos -->
+    <div class="mb-8">
+     <h3 class="text-xl font-semibold mb-4 text-gray-700 text-center">🎨 The Bible Project - Animated Overviews</h3>
+     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('ddd3OLGr1IM', 'The Book of Genesis - Overview')">
+       <div class="relative"><img src="https://img.youtube.com/vi/ddd3OLGr1IM/maxresdefault.jpg" alt="Genesis Overview" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-red-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         📺
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-red-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Genesis Overview</h3>
+        <p class="text-gray-600 text-sm">The beginning of everything</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('F4isSyennFo', 'The Book of Exodus - Overview')">
+       <div class="relative"><img src="https://img.youtube.com/vi/F4isSyennFo/maxresdefault.jpg" alt="Exodus Overview" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-blue-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         🌊
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-blue-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Exodus Overview</h3>
+        <p class="text-gray-600 text-sm">Freedom from Egypt</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('JydNSlufRIs', 'The Book of Matthew - Overview')">
+       <div class="relative"><img src="https://img.youtube.com/vi/JydNSlufRIs/maxresdefault.jpg" alt="Matthew Overview" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-purple-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         👑
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-purple-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Matthew Overview</h3>
+        <p class="text-gray-600 text-sm">The Gospel of the King</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('3dEh25pduQ8', 'The Book of Romans - Overview')">
+       <div class="relative"><img src="https://img.youtube.com/vi/3dEh25pduQ8/maxresdefault.jpg" alt="Romans Overview" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-green-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         ✨
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-green-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Romans Overview</h3>
+        <p class="text-gray-600 text-sm">The Gospel explained</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('ak06MSETeo4', 'How to Read the Bible')">
+       <div class="relative"><img src="https://img.youtube.com/vi/ak06MSETeo4/maxresdefault.jpg" alt="How to Read Bible" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-yellow-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         🍞
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-yellow-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">How to Read the Bible</h3>
+        <p class="text-gray-600 text-sm">Understanding Scripture</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('VhmlJBUIoLk', 'The Gospel - Good News')">
+       <div class="relative"><img src="https://img.youtube.com/vi/VhmlJBUIoLk/maxresdefault.jpg" alt="The Gospel" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-orange-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         ❤️
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-orange-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Gospel</h3>
+        <p class="text-gray-600 text-sm">The good news of salvation</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Black and White Bible Videos -->
+    <div class="mb-8">
+     <h3 class="text-xl font-semibold mb-4 text-gray-700 text-center">⚫⚪ Black and White Bible - Visual Stories</h3>
+     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('Zy2AQlK6C5k', 'The Story of Creation')">
+       <div class="relative"><img src="https://img.youtube.com/vi/Zy2AQlK6C5k/maxresdefault.jpg" alt="Creation Story" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-black to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         🌟
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-gray-800 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Story of Creation</h3>
+        <p class="text-gray-600 text-sm">God creates the world in 7 days</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('vZbvlqHcVQg', 'Noah and the Ark')">
+       <div class="relative"><img src="https://img.youtube.com/vi/vZbvlqHcVQg/maxresdefault.jpg" alt="Noah Ark" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-blue-800 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         🚢
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-blue-800 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Noah and the Ark</h3>
+        <p class="text-gray-600 text-sm">The great flood and God's promise</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('QMYfxyM2KXs', 'David and Goliath')">
+       <div class="relative"><img src="https://img.youtube.com/vi/QMYfxyM2KXs/maxresdefault.jpg" alt="David Goliath" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-yellow-700 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         ⚔️
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-yellow-700 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">David and Goliath</h3>
+        <p class="text-gray-600 text-sm">The shepherd boy defeats the giant</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('1k4BSayq6Jw', 'The Birth of Jesus')">
+       <div class="relative"><img src="https://img.youtube.com/vi/1k4BSayq6Jw/maxresdefault.jpg" alt="Jesus Birth" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-gold to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         👶
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-yellow-600 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Birth of Jesus</h3>
+        <p class="text-gray-600 text-sm">The nativity story in Bethlehem</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('ay_Db4RwZ_M', 'Jesus Feeds 5000')">
+       <div class="relative"><img src="https://img.youtube.com/vi/ay_Db4RwZ_M/maxresdefault.jpg" alt="Feeding 5000" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-green-700 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         🍞
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-green-700 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Jesus Feeds 5000</h3>
+        <p class="text-gray-600 text-sm">The miracle of loaves and fishes</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('soCkftBBsBo', 'The Crucifixion')">
+       <div class="relative"><img src="https://img.youtube.com/vi/soCkftBBsBo/maxresdefault.jpg" alt="Crucifixion" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-red-800 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         ✝️
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-red-800 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Crucifixion</h3>
+        <p class="text-gray-600 text-sm">Jesus' sacrifice for humanity</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('ZKv_nzbc3u0', 'The Resurrection')">
+       <div class="relative"><img src="https://img.youtube.com/vi/ZKv_nzbc3u0/maxresdefault.jpg" alt="Resurrection" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-yellow-400 to-white text-gray-800 flex items-center justify-center text-6xl" style="display: none;">
+         🌅
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-yellow-500 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Resurrection</h3>
+        <p class="text-gray-600 text-sm">Jesus rises from the dead</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('Gc16H3uHm_o', 'Moses and the Ten Commandments')">
+       <div class="relative"><img src="https://img.youtube.com/vi/Gc16H3uHm_o/maxresdefault.jpg" alt="Ten Commandments" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-purple-800 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         📜
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-purple-800 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">Moses &amp; Ten Commandments</h3>
+        <p class="text-gray-600 text-sm">God's laws given to Moses</p>
+       </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow" onclick="openYouTubeVideo('JydNSlufRIs', 'The Parable of the Good Samaritan')">
+       <div class="relative"><img src="https://img.youtube.com/vi/JydNSlufRIs/maxresdefault.jpg" alt="Good Samaritan" class="w-full h-48 object-cover" onerror="this.src=''; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="w-full h-48 bg-gradient-to-br from-teal-700 to-gray-600 text-white flex items-center justify-center text-6xl" style="display: none;">
+         ❤️
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+         <div class="bg-teal-700 text-white rounded-full p-4">
+          <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
+          </svg>
+         </div>
+        </div>
+       </div>
+       <div class="p-4">
+        <h3 class="font-bold text-lg mb-2">The Good Samaritan</h3>
+        <p class="text-gray-600 text-sm">Jesus teaches about loving others</p>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Profile Section -->
+   <section id="profile-section" class="section hidden">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">👤 My Bible Study Profile</h2>
+    <div class="grid md:grid-cols-2 gap-6"><!-- Personal Information -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">📝 Personal Information</h3>
+      <div class="space-y-4">
+       <div><label class="block text-sm font-medium mb-2">Your Name:</label> <input type="text" id="profile-name" class="w-full p-2 border rounded-lg" placeholder="Enter your name">
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Age Group:</label> <select id="profile-age" class="w-full p-2 border rounded-lg"> <option value="">Select age group...</option> <option value="child">Child (5-12)</option> <option value="teen">Teen (13-17)</option> <option value="young-adult">Young Adult (18-25)</option> <option value="adult">Adult (26-50)</option> <option value="senior">Senior (50+)</option> </select>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Bible Study Experience:</label> <select id="profile-experience" class="w-full p-2 border rounded-lg"> <option value="">Select experience level...</option> <option value="beginner">Beginner - New to Bible study</option> <option value="intermediate">Intermediate - Some experience</option> <option value="advanced">Advanced - Regular Bible reader</option> <option value="teacher">Teacher/Leader - I teach others</option> </select>
+       </div><button onclick="savePersonalInfo()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"> 💾 Save Personal Info </button>
+      </div>
+     </div><!-- Study Preferences -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">⚙️ Study Preferences</h3>
+      <div class="space-y-4">
+       <div><label class="block text-sm font-medium mb-2">Favorite Bible Books:</label>
+        <div class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto"><label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="Genesis"> Genesis</label> <label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="Psalms"> Psalms</label> <label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="Proverbs"> Proverbs</label> <label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="Matthew"> Matthew</label> <label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="John"> John</label> <label class="flex items-center"><input type="checkbox" class="favorite-book mr-2" value="Romans"> Romans</label>
+        </div>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Daily Reading Goal:</label> <select id="reading-goal" class="w-full p-2 border rounded-lg"> <option value="1">1 chapter per day</option> <option value="2">2 chapters per day</option> <option value="3">3 chapters per day</option> <option value="4">4 chapters per day</option> <option value="5">5 chapters per day</option> </select>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Preferred Study Time:</label> <select id="study-time" class="w-full p-2 border rounded-lg"> <option value="morning">Morning (6-10 AM)</option> <option value="afternoon">Afternoon (12-4 PM)</option> <option value="evening">Evening (6-9 PM)</option> <option value="night">Night (9-11 PM)</option> <option value="flexible">Flexible - Anytime</option> </select>
+       </div><button onclick="saveStudyPreferences()" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"> ⚙️ Save Preferences </button>
+      </div>
+     </div>
+    </div><!-- Personal Notes & Goals -->
+    <div class="grid md:grid-cols-2 gap-6 mt-6"><!-- Personal Notes -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">📔 Personal Study Notes</h3>
+      <div class="space-y-4">
+       <div><label class="block text-sm font-medium mb-2">Current Favorite Verse:</label> <input type="text" id="current-verse" class="w-full p-2 border rounded-lg" placeholder="e.g., John 3:16">
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Study Notes &amp; Reflections:</label> <textarea id="study-notes" class="w-full p-2 border rounded-lg h-24" placeholder="Write your thoughts, insights, and reflections here..."></textarea>
+       </div>
+       <div><label class="block text-sm font-medium mb-2">Prayer Requests:</label> <textarea id="prayer-requests" class="w-full p-2 border rounded-lg h-20" placeholder="Personal prayer requests and praises..."></textarea>
+       </div><button onclick="savePersonalNotes()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"> 📝 Save Notes </button>
+      </div>
+     </div><!-- Goals & Achievements -->
+     <div class="bg-white rounded-lg shadow-lg p-6">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">🏆 Goals &amp; Achievements</h3><!-- Study Goals -->
+      <div class="mb-6">
+       <h4 class="font-semibold mb-3">📅 Study Goals</h4>
+       <div class="space-y-2">
+        <div><label class="block text-sm font-medium mb-1">Main Goal:</label> <select id="main-goal" class="w-full p-2 border rounded-lg text-sm"> <option value="">Choose a goal...</option> <option value="read-bible-year">Read the entire Bible in a year</option> <option value="memorize-verses">Memorize 50 Bible verses</option> <option value="daily-reading">Read Bible daily for 100 days</option> <option value="study-books">Study 10 Bible books deeply</option> <option value="custom">Custom goal</option> </select>
+        </div>
+        <div id="custom-goal-input" class="hidden"><input type="text" id="custom-goal-text" class="w-full p-2 border rounded-lg text-sm" placeholder="Describe your custom goal...">
+        </div>
+        <div><label class="block text-sm font-medium mb-1">Target Date:</label> <input type="date" id="goal-date" class="w-full p-2 border rounded-lg text-sm">
+        </div><button onclick="saveGoal()" class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 text-sm"> 🎯 Set Goal </button>
+       </div>
+      </div><!-- Achievement Badges -->
+      <div>
+       <h4 class="font-semibold mb-3">🏅 Achievement Badges</h4>
+       <div class="grid grid-cols-3 gap-2">
+        <div id="badge-first-chapter" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          📖
+         </div>
+         <div>
+          First Chapter
+         </div>
+        </div>
+        <div id="badge-quiz-master" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          🧠
+         </div>
+         <div>
+          Quiz Master
+         </div>
+        </div>
+        <div id="badge-game-player" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          🎮
+         </div>
+         <div>
+          Game Player
+         </div>
+        </div>
+        <div id="badge-verse-collector" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          💎
+         </div>
+         <div>
+          Verse Collector
+         </div>
+        </div>
+        <div id="badge-generous-heart" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          💝
+         </div>
+         <div>
+          Generous Heart
+         </div>
+        </div>
+        <div id="badge-video-watcher" class="achievement-badge bg-gray-100 p-2 rounded text-center text-xs opacity-50">
+         <div class="text-lg">
+          📺
+         </div>
+         <div>
+          Video Watcher
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Progress Display -->
+   <div class="mt-8 bg-white rounded-lg shadow-lg p-4">
+    <h3 class="text-lg font-semibold mb-2">📊 Your Progress</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+     <div>
+      <div class="text-2xl font-bold text-blue-600" id="study-progress">
+       0
+      </div>
+      <div class="text-sm text-gray-600">
+       Chapters Read
+      </div>
+     </div>
+     <div>
+      <div class="text-2xl font-bold text-purple-600" id="quiz-progress">
+       0
+      </div>
+      <div class="text-sm text-gray-600">
+       Quiz Score
+      </div>
+     </div>
+     <div>
+      <div class="text-2xl font-bold text-green-600" id="game-progress">
+       0
+      </div>
+      <div class="text-sm text-gray-600">
+       Games Played
+      </div>
+     </div>
+     <div>
+      <div class="text-2xl font-bold text-yellow-600" id="verse-progress">
+       0
+      </div>
+      <div class="text-sm text-gray-600">
+       Favorite Verses
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Configuration and SDK setup
+        const defaultConfig = {
+            app_title: "Bible Learning Center",
+            welcome_message: "Welcome to your Bible study journey",
+            donation_title: "Help Children in Need",
+            donation_message: "Your donation helps provide for children in need",
+            primary_color: "#2563eb",
+            secondary_color: "#7c3aed",
+            accent_color: "#059669",
+            text_color: "#374151",
+            background_color: "#f8fafc"
+        };
+
+        let currentData = [];
+        let quizScore = 0;
+        let quizTotal = 0;
+        let currentQuestionIndex = 0;
+
+        // Bible data
+        const oldTestamentBooks = [
+            "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+            "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
+            "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
+            "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs"
+        ];
+
+        const newTestamentBooks = [
+            "Matthew", "Mark", "Luke", "John", "Acts",
+            "Romans", "1 Corinthians", "2 Corinthians", "Galatians",
+            "Ephesians", "Philippians", "Colossians", "1 Thessalonians",
+            "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus",
+            "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
+            "1 John", "2 John", "3 John", "Jude", "Revelation"
+        ];
+
+        const quizQuestions = [
+            {
+                question: "Who built the ark?",
+                options: ["Noah", "Moses", "David", "Abraham"],
+                correct: 0
+            },
+            {
+                question: "How many days did God take to create the world?",
+                options: ["5", "6", "7", "8"],
+                correct: 1
+            },
+            {
+                question: "Who was swallowed by a great fish?",
+                options: ["Jonah", "Job", "Joshua", "Jeremiah"],
+                correct: 0
+            },
+            {
+                question: "What is the first book of the Bible?",
+                options: ["Exodus", "Genesis", "Leviticus", "Numbers"],
+                correct: 1
+            },
+            {
+                question: "Who defeated Goliath?",
+                options: ["Saul", "Samuel", "David", "Daniel"],
+                correct: 2
+            }
+        ];
+
+        const dailyVerses = [
+            { text: "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.", reference: "John 3:16" },
+            { text: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.", reference: "Proverbs 3:5-6" },
+            { text: "I can do all things through Christ who strengthens me.", reference: "Philippians 4:13" },
+            { text: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul.", reference: "Psalm 23:1-3" },
+            { text: "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", reference: "Joshua 1:9" },
+            { text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.", reference: "Romans 8:28" },
+            { text: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!", reference: "2 Corinthians 5:17" },
+            { text: "Cast all your anxiety on him because he cares for you.", reference: "1 Peter 5:7" },
+            { text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint.", reference: "Isaiah 40:31" },
+            { text: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you; in his love he will no longer rebuke you, but will rejoice over you with singing.", reference: "Zephaniah 3:17" },
+            { text: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", reference: "Joshua 1:9" },
+            { text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.", reference: "Jeremiah 29:11" },
+            { text: "The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you; the Lord turn his face toward you and give you peace.", reference: "Numbers 6:24-26" },
+            { text: "Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It does not dishonor others, it is not self-seeking, it is not easily angered, it keeps no record of wrongs.", reference: "1 Corinthians 13:4-5" },
+            { text: "Come to me, all you who are weary and burdened, and I will give you rest. Take my yoke upon you and learn from me, for I am gentle and humble in heart, and you will find rest for your souls.", reference: "Matthew 11:28-29" }
+        ];
+
+        // Data SDK handler
+        const dataHandler = {
+            onDataChanged(data) {
+                currentData = data;
+                updateProgress();
+                loadProfile();
+            }
+        };
+
+        // Element SDK setup
+        async function initializeSDKs() {
+            if (window.dataSdk) {
+                const initResult = await window.dataSdk.init(dataHandler);
+                if (!initResult.isOk) {
+                    console.error("Failed to initialize data SDK");
+                }
+            }
+
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => {
+                        document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+                        document.getElementById('welcome-message').textContent = config.welcome_message || defaultConfig.welcome_message;
+                        document.getElementById('donation-title').textContent = config.donation_title || defaultConfig.donation_title;
+                        document.getElementById('donation-message').textContent = config.donation_message || defaultConfig.donation_message;
+                        
+                        // Apply colors
+                        const primaryColor = config.primary_color || defaultConfig.primary_color;
+                        const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+                        const accentColor = config.accent_color || defaultConfig.accent_color;
+                        
+                        document.querySelectorAll('.bg-blue-600').forEach(el => {
+                            el.style.backgroundColor = primaryColor;
+                        });
+                        document.querySelectorAll('.bg-purple-600').forEach(el => {
+                            el.style.backgroundColor = secondaryColor;
+                        });
+                        document.querySelectorAll('.bg-green-600').forEach(el => {
+                            el.style.backgroundColor = accentColor;
+                        });
+                    },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [
+                            {
+                                get: () => config.primary_color || defaultConfig.primary_color,
+                                set: (value) => {
+                                    if (window.elementSdk) {
+                                        window.elementSdk.setConfig({ primary_color: value });
+                                    }
+                                }
+                            },
+                            {
+                                get: () => config.secondary_color || defaultConfig.secondary_color,
+                                set: (value) => {
+                                    if (window.elementSdk) {
+                                        window.elementSdk.setConfig({ secondary_color: value });
+                                    }
+                                }
+                            },
+                            {
+                                get: () => config.accent_color || defaultConfig.accent_color,
+                                set: (value) => {
+                                    if (window.elementSdk) {
+                                        window.elementSdk.setConfig({ accent_color: value });
+                                    }
+                                }
+                            }
+                        ],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ["app_title", config.app_title || defaultConfig.app_title],
+                        ["welcome_message", config.welcome_message || defaultConfig.welcome_message],
+                        ["donation_title", config.donation_title || defaultConfig.donation_title],
+                        ["donation_message", config.donation_message || defaultConfig.donation_message]
+                    ])
+                });
+            }
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the selected section
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+            
+            // Update nav buttons - find the clicked button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-300');
+            });
+            
+            // Add active state to clicked button
+            const clickedButton = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('ring-2', 'ring-offset-2', 'ring-blue-300');
+            }
+        }
+
+        // Profile Functions
+        async function savePersonalInfo() {
+            const name = document.getElementById('profile-name').value;
+            const age = document.getElementById('profile-age').value;
+            const experience = document.getElementById('profile-experience').value;
+            
+            if (!name) {
+                showMessage("Please enter your name.");
+                return;
+            }
+            
+            if (window.dataSdk && currentData.length < 999) {
+                const profileRecord = {
+                    type: 'personal_info',
+                    name: name,
+                    age_group: age,
+                    experience_level: experience,
+                    created_at: new Date().toISOString()
+                };
+                
+                const result = await window.dataSdk.create(profileRecord);
+                if (result.isOk) {
+                    showMessage(`Welcome ${name}! Your profile has been saved. 👤`);
+                    updateWelcomeMessage(name);
+                } else {
+                    showMessage("Unable to save profile. Please try again.");
+                }
+            } else if (currentData.length >= 999) {
+                showMessage("Storage limit reached. Please contact support.");
+            } else {
+                showMessage(`Welcome ${name}! Profile saved locally. 👤`);
+                updateWelcomeMessage(name);
+            }
+        }
+
+        async function saveStudyPreferences() {
+            const favoriteBooks = Array.from(document.querySelectorAll('.favorite-book:checked')).map(cb => cb.value);
+            const readingGoal = document.getElementById('reading-goal').value;
+            const studyTime = document.getElementById('study-time').value;
+            
+            if (window.dataSdk && currentData.length < 999) {
+                const preferencesRecord = {
+                    type: 'study_preferences',
+                    favorite_books: favoriteBooks.join(','),
+                    daily_reading_goal: parseInt(readingGoal),
+                    preferred_study_time: studyTime,
+                    created_at: new Date().toISOString()
+                };
+                
+                const result = await window.dataSdk.create(preferencesRecord);
+                if (result.isOk) {
+                    showMessage("Study preferences saved! Your experience is now personalized. ⚙️");
+                } else {
+                    showMessage("Unable to save preferences. Please try again.");
+                }
+            } else if (currentData.length >= 999) {
+                showMessage("Storage limit reached. Please contact support.");
+            } else {
+                showMessage("Study preferences saved locally! ⚙️");
+            }
+        }
+
+        async function savePersonalNotes() {
+            const currentVerse = document.getElementById('current-verse').value;
+            const studyNotes = document.getElementById('study-notes').value;
+            const prayerRequests = document.getElementById('prayer-requests').value;
+            
+            if (window.dataSdk && currentData.length < 999) {
+                const notesRecord = {
+                    type: 'personal_notes',
+                    current_favorite_verse: currentVerse,
+                    study_notes: studyNotes,
+                    prayer_requests: prayerRequests,
+                    created_at: new Date().toISOString()
+                };
+                
+                const result = await window.dataSdk.create(notesRecord);
+                if (result.isOk) {
+                    showMessage("Personal notes and prayers saved! 📝🙏");
+                } else {
+                    showMessage("Unable to save notes. Please try again.");
+                }
+            } else if (currentData.length >= 999) {
+                showMessage("Storage limit reached. Please contact support.");
+            } else {
+                showMessage("Personal notes saved locally! 📝");
+            }
+        }
+
+        async function saveGoal() {
+            const mainGoal = document.getElementById('main-goal').value;
+            const customGoalText = document.getElementById('custom-goal-text').value;
+            const goalDate = document.getElementById('goal-date').value;
+            
+            let goalDescription = mainGoal;
+            if (mainGoal === 'custom' && customGoalText) {
+                goalDescription = customGoalText;
+            }
+            
+            if (!goalDescription || goalDescription === 'custom') {
+                showMessage("Please select or enter a goal.");
+                return;
+            }
+            
+            if (window.dataSdk && currentData.length < 999) {
+                const goalRecord = {
+                    type: 'study_goal',
+                    goal_description: goalDescription,
+                    target_date: goalDate,
+                    created_at: new Date().toISOString()
+                };
+                
+                const result = await window.dataSdk.create(goalRecord);
+                if (result.isOk) {
+                    showMessage("Study goal set! You're on your way to achieving it! 🎯");
+                } else {
+                    showMessage("Unable to save goal. Please try again.");
+                }
+            } else if (currentData.length >= 999) {
+                showMessage("Storage limit reached. Please contact support.");
+            } else {
+                showMessage("Study goal set locally! 🎯");
+            }
+        }
+
+        function updateWelcomeMessage(name) {
+            const welcomeMsg = document.getElementById('welcome-message');
+            welcomeMsg.textContent = `Welcome back, ${name}! Continue your Bible study journey`;
+        }
+
+        function loadProfile() {
+            // Load saved profile data
+            const personalInfo = currentData.filter(item => item.type === 'personal_info').pop();
+            if (personalInfo) {
+                document.getElementById('profile-name').value = personalInfo.name || '';
+                document.getElementById('profile-age').value = personalInfo.age_group || '';
+                document.getElementById('profile-experience').value = personalInfo.experience_level || '';
+                updateWelcomeMessage(personalInfo.name);
+            }
+            
+            const preferences = currentData.filter(item => item.type === 'study_preferences').pop();
+            if (preferences) {
+                document.getElementById('reading-goal').value = preferences.daily_reading_goal || '1';
+                document.getElementById('study-time').value = preferences.preferred_study_time || 'morning';
+                
+                if (preferences.favorite_books) {
+                    const favoriteBooks = preferences.favorite_books.split(',');
+                    document.querySelectorAll('.favorite-book').forEach(cb => {
+                        cb.checked = favoriteBooks.includes(cb.value);
+                    });
+                }
+            }
+            
+            const notes = currentData.filter(item => item.type === 'personal_notes').pop();
+            if (notes) {
+                document.getElementById('current-verse').value = notes.current_favorite_verse || '';
+                document.getElementById('study-notes').value = notes.study_notes || '';
+                document.getElementById('prayer-requests').value = notes.prayer_requests || '';
+            }
+            
+            updateAchievements();
+        }
+
+        function updateAchievements() {
+            const studyCount = currentData.filter(item => item.type === 'reading_progress').length;
+            const quizCount = currentData.filter(item => item.type === 'quiz_score').length;
+            const gameCount = currentData.filter(item => item.type === 'game_score').length;
+            const verseCount = currentData.filter(item => item.type === 'favorite_verse').length;
+            const donationCount = currentData.filter(item => item.type === 'donation').length;
+            const videoCount = currentData.filter(item => item.type === 'video_clicked').length;
+            
+            // Update achievement badges
+            if (studyCount >= 1) unlockBadge('badge-first-chapter', 'bg-blue-200');
+            if (quizCount >= 5) unlockBadge('badge-quiz-master', 'bg-purple-200');
+            if (gameCount >= 3) unlockBadge('badge-game-player', 'bg-green-200');
+            if (verseCount >= 3) unlockBadge('badge-verse-collector', 'bg-yellow-200');
+            if (donationCount >= 1) unlockBadge('badge-generous-heart', 'bg-pink-200');
+            if (videoCount >= 2) unlockBadge('badge-video-watcher', 'bg-red-200');
+        }
+
+        function unlockBadge(badgeId, colorClass) {
+            const badge = document.getElementById(badgeId);
+            if (badge && badge.classList.contains('opacity-50')) {
+                badge.classList.remove('opacity-50', 'bg-gray-100');
+                badge.classList.add(colorClass);
+                badge.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    badge.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+
+        // Bible Study Functions
+        function loadBooks() {
+            const testament = document.getElementById('testament-select').value;
+            const bookSelect = document.getElementById('book-select');
+            const books = testament === 'old' ? oldTestamentBooks : newTestamentBooks;
+            
+            bookSelect.innerHTML = '<option value="">Select a book...</option>';
+            books.forEach(book => {
+                bookSelect.innerHTML += `<option value="${book}">${book}</option>`;
+            });
+        }
+
+        function loadChapters() {
+            const book = document.getElementById('book-select').value;
+            const chapterSelect = document.getElementById('chapter-select');
+            
+            if (!book) return;
+            
+            chapterSelect.innerHTML = '<option value="">Select chapter...</option>';
+            // Most books have different chapter counts, using 50 as max for demo
+            const maxChapters = book === 'Psalms' ? 150 : 50;
+            for (let i = 1; i <= maxChapters; i++) {
+                chapterSelect.innerHTML += `<option value="${i}">Chapter ${i}</option>`;
+            }
+        }
+
+        function loadVerses() {
+            // This would load verses for the selected chapter
+        }
+
+        function readChapter() {
+            const book = document.getElementById('book-select').value;
+            const chapter = document.getElementById('chapter-select').value;
+            
+            if (!book || !chapter) {
+                showMessage("Please select a book and chapter first.");
+                return;
+            }
+            
+            const bibleText = document.getElementById('bible-text');
+            const chapterTitle = document.getElementById('chapter-title');
+            const versesContainer = document.getElementById('verses-container');
+            
+            chapterTitle.textContent = `${book} Chapter ${chapter}`;
+            
+            // Sample verses for demonstration
+            const sampleVerses = [
+                "In the beginning God created the heavens and the earth.",
+                "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
+                "And God said, 'Let there be light,' and there was light.",
+                "God saw that the light was good, and he separated the light from the darkness.",
+                "God called the light 'day,' and the darkness he called 'night.' And there was evening, and there was morning—the first day."
+            ];
+            
+            versesContainer.innerHTML = '';
+            sampleVerses.forEach((verse, index) => {
+                const verseDiv = document.createElement('div');
+                verseDiv.className = 'verse mb-2';
+                verseDiv.innerHTML = `<span class="verse-number font-bold text-blue-600">${index + 1}</span> ${verse}`;
+                versesContainer.appendChild(verseDiv);
+            });
+            
+            bibleText.classList.remove('hidden');
+            saveProgress('reading_progress', `${book} ${chapter}`);
+        }
+
+        function saveVerse() {
+            const verse = document.getElementById('daily-verse').textContent;
+            const reference = document.getElementById('verse-reference').textContent;
+            saveProgress('favorite_verse', `${verse} - ${reference}`);
+            showMessage("Verse saved to your favorites! 💖");
+        }
+
+        // Quiz Functions
+        function selectAnswer(button, isCorrect) {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                opt.classList.remove('correct-answer', 'wrong-answer');
+            });
+            
+            if (isCorrect) {
+                button.classList.add('correct-answer');
+                quizScore++;
+                showMessage("Correct! Well done! ✅");
+            } else {
+                button.classList.add('wrong-answer');
+                // Show correct answer
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                showMessage("Not quite right. The correct answer is highlighted. 📚");
+            }
+            
+            quizTotal++;
+            document.getElementById('quiz-score').textContent = quizScore;
+            document.getElementById('quiz-total').textContent = quizTotal;
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex = (currentQuestionIndex + 1) % quizQuestions.length;
+            const question = quizQuestions[currentQuestionIndex];
+            
+            document.getElementById('question-text').textContent = question.question;
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'quiz-option w-full text-left p-3 border rounded-lg';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(button, index === question.correct);
+                optionsContainer.appendChild(button);
+            });
+            
+            document.getElementById('next-btn').disabled = true;
+            saveProgress('quiz_score', quizScore);
+        }
+
+        // Game Functions - Each opens on a separate page
+        function startMemoryGame() {
+            showGamePage('memory');
+        }
+
+        function startWordSearch() {
+            showGamePage('wordsearch');
+        }
+
+        function startTrivia() {
+            showGamePage('trivia');
+        }
+
+        function startVerseScramble() {
+            showGamePage('scramble');
+        }
+
+        function startBingo() {
+            showGamePage('bingo');
+        }
+
+        function startTimeline() {
+            showGamePage('timeline');
+        }
+
+        function showGamePage(gameType) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Create and show game page
+            let gamePageId = gameType + '-game-page';
+            let existingPage = document.getElementById(gamePageId);
+            
+            if (existingPage) {
+                existingPage.classList.remove('hidden');
+                return;
+            }
+            
+            const gamePages = {
+                memory: createMemoryGamePage(),
+                wordsearch: createWordSearchPage(),
+                trivia: createTriviaGamePage(),
+                scramble: createScramblePage(),
+                bingo: createBingoPage(),
+                timeline: createTimelinePage()
+            };
+            
+            const gamePageHTML = `
+                <section id="${gamePageId}" class="section">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <button onclick="backToGames()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                                ← Back to Games
+                            </button>
+                            <h1 class="text-2xl font-bold text-gray-800">${gamePages[gameType].title}</h1>
+                            <div class="w-24"></div>
+                        </div>
+                        ${gamePages[gameType].content}
+                    </div>
+                </section>
+            `;
+            
+            document.querySelector('.container').insertAdjacentHTML('beforeend', gamePageHTML);
+            saveGameProgress();
+        }
+
+        function createMemoryGamePage() {
+            const cards = ['👑', '⛪', '📖', '✝️', '🕊️', '🌟', '🙏', '❤️'];
+            const gameCards = [...cards, ...cards].sort(() => Math.random() - 0.5);
+            
+            return {
+                title: '🧠 Memory Match Game',
+                content: `
+                    <div class="text-center mb-6">
+                        <p class="text-lg text-gray-600">Match the Bible symbols! Click two cards to find pairs.</p>
+                        <div class="mt-4">
+                            <span class="text-lg font-semibold">Score: <span id="memory-score">0</span></span>
+                            <span class="ml-4 text-lg font-semibold">Moves: <span id="memory-moves">0</span></span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3 max-w-lg mx-auto">
+                        ${gameCards.map((symbol, index) => `
+                            <div class="memory-card bg-blue-100 h-20 rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-200 text-2xl font-bold border-2 border-blue-200" 
+                                 onclick="flipMemoryCard(this, '${symbol}', ${index})" data-symbol="${symbol}" data-flipped="false">
+                                ?
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="text-center mt-6">
+                        <button onclick="resetMemoryGame()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            🔄 New Game
+                        </button>
+                    </div>
+                `
+            };
+        }
+
+        function createWordSearchPage() {
+            const words = ['JESUS', 'LOVE', 'FAITH', 'HOPE', 'PEACE', 'GRACE', 'MERCY', 'LIGHT'];
+            const grid = Array(10).fill().map(() => Array(10).fill(''));
+            
+            // Place words randomly (simplified for demo)
+            words.forEach(word => {
+                const row = Math.floor(Math.random() * 10);
+                const col = Math.floor(Math.random() * (10 - word.length));
+                for (let i = 0; i < word.length; i++) {
+                    grid[row][col + i] = word[i];
+                }
+            });
+            
+            // Fill empty spaces with random letters
+            for (let i = 0; i < 10; i++) {
+                for (let j = 0; j < 10; j++) {
+                    if (grid[i][j] === '') {
+                        grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+            
+            return {
+                title: '🔍 Bible Word Search',
+                content: `
+                    <div class="text-center mb-6">
+                        <p class="text-lg text-gray-600">Find these Bible words in the grid!</p>
+                        <div class="flex flex-wrap justify-center gap-2 mt-4">
+                            ${words.map(word => `
+                                <span class="bg-yellow-100 px-3 py-1 rounded-full text-sm font-semibold" id="word-${word}">
+                                    ${word}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-10 gap-1 max-w-lg mx-auto">
+                        ${grid.flat().map((letter, index) => `
+                            <div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-sm font-bold cursor-pointer hover:bg-yellow-200" 
+                                 onclick="selectLetter(this)" data-letter="${letter}">
+                                ${letter}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="text-center mt-6">
+                        <p class="text-sm text-gray-600">Found: <span id="words-found">0</span> / ${words.length}</p>
+                    </div>
+                `
+            };
+        }
+
+        function createTriviaGamePage() {
+            return {
+                title: '🎯 Bible Trivia Challenge',
+                content: `
+                    <div class="max-w-2xl mx-auto">
+                        <div class="text-center mb-6">
+                            <div class="text-lg font-semibold mb-2">Question <span id="trivia-question-num">1</span> of 10</div>
+                            <div class="text-sm text-gray-600">Score: <span id="trivia-score">0</span> / <span id="trivia-total">0</span></div>
+                        </div>
+                        <div id="trivia-question-container">
+                            <h3 class="text-xl font-semibold mb-6 text-center" id="trivia-question">Who was the first man created by God?</h3>
+                            <div class="space-y-3" id="trivia-options">
+                                <button class="trivia-option w-full text-left p-4 border-2 rounded-lg hover:bg-blue-50 hover:border-blue-300" onclick="selectTriviaAnswer(this, true)">Adam</button>
+                                <button class="trivia-option w-full text-left p-4 border-2 rounded-lg hover:bg-blue-50 hover:border-blue-300" onclick="selectTriviaAnswer(this, false)">Noah</button>
+                                <button class="trivia-option w-full text-left p-4 border-2 rounded-lg hover:bg-blue-50 hover:border-blue-300" onclick="selectTriviaAnswer(this, false)">Moses</button>
+                                <button class="trivia-option w-full text-left p-4 border-2 rounded-lg hover:bg-blue-50 hover:border-blue-300" onclick="selectTriviaAnswer(this, false)">Abraham</button>
+                            </div>
+                        </div>
+                        <div class="text-center mt-6">
+                            <button onclick="nextTriviaQuestion()" id="trivia-next-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50" disabled>
+                                Next Question →
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createScramblePage() {
+            const verses = [
+                { scrambled: ['GOD', 'SO', 'LOVED', 'THE', 'WORLD'], correct: 'GOD SO LOVED THE WORLD', reference: 'John 3:16' },
+                { scrambled: ['TRUST', 'IN', 'THE', 'LORD'], correct: 'TRUST IN THE LORD', reference: 'Proverbs 3:5' },
+                { scrambled: ['I', 'CAN', 'DO', 'ALL', 'THINGS'], correct: 'I CAN DO ALL THINGS', reference: 'Philippians 4:13' }
+            ];
+            const currentVerse = verses[Math.floor(Math.random() * verses.length)];
+            const shuffledWords = [...currentVerse.scrambled].sort(() => Math.random() - 0.5);
+            
+            return {
+                title: '🔤 Verse Scramble',
+                content: `
+                    <div class="max-w-2xl mx-auto text-center">
+                        <p class="text-lg text-gray-600 mb-6">Drag the words to form the correct Bible verse!</p>
+                        <div class="mb-6">
+                            <p class="text-sm text-gray-500">Reference: ${currentVerse.reference}</p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-3 mb-8" id="scrambled-words">
+                            ${shuffledWords.map((word, index) => `
+                                <div class="scramble-word bg-blue-100 px-4 py-2 rounded-lg cursor-move hover:bg-blue-200 font-semibold" 
+                                     draggable="true" ondragstart="dragStart(event)" data-word="${word}">
+                                    ${word}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="border-2 border-dashed border-gray-300 p-6 rounded-lg min-h-20 mb-6" 
+                             ondrop="dropWord(event)" ondragover="allowDrop(event)" id="verse-builder">
+                            <p class="text-gray-500">Drop words here to build the verse</p>
+                        </div>
+                        <div class="space-y-4">
+                            <button onclick="checkVerse('${currentVerse.correct}')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                                ✓ Check Answer
+                            </button>
+                            <button onclick="resetScramble()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createBingoPage() {
+            const bingoWords = ['FAITH', 'HOPE', 'LOVE', 'PEACE', 'JOY', 'GRACE', 'MERCY', 'TRUTH', 'LIGHT', 'PRAYER', 'WISDOM', 'GLORY', 'PRAISE', 'SPIRIT', 'HEAVEN', 'BLESSED'];
+            const selectedWords = bingoWords.sort(() => Math.random() - 0.5).slice(0, 16);
+            
+            return {
+                title: '🎲 Bible Bingo',
+                content: `
+                    <div class="max-w-lg mx-auto text-center">
+                        <p class="text-lg text-gray-600 mb-6">Mark off the words as they're called!</p>
+                        <div class="grid grid-cols-4 gap-2 mb-6">
+                            ${selectedWords.map(word => `
+                                <div class="bingo-cell bg-yellow-100 p-3 rounded-lg cursor-pointer hover:bg-yellow-200 text-sm font-bold border-2 border-yellow-200" 
+                                     onclick="markBingoCell(this)" data-word="${word}">
+                                    ${word}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="space-y-4">
+                            <div class="text-lg font-semibold">
+                                Current Call: <span id="current-call" class="text-blue-600">Click 'Call Word' to start!</span>
+                            </div>
+                            <button onclick="callBingoWord()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                📢 Call Word
+                            </button>
+                            <button onclick="checkBingo()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                                🎉 Check Bingo!
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function createTimelinePage() {
+            const events = [
+                { name: 'Creation of the World', order: 1 },
+                { name: 'Noah\'s Ark', order: 2 },
+                { name: 'Abraham\'s Call', order: 3 },
+                { name: 'Moses & the Exodus', order: 4 },
+                { name: 'David becomes King', order: 5 },
+                { name: 'Jesus\' Birth', order: 6 },
+                { name: 'Jesus\' Crucifixion', order: 7 },
+                { name: 'Jesus\' Resurrection', order: 8 }
+            ];
+            const shuffledEvents = [...events].sort(() => Math.random() - 0.5);
+            
+            return {
+                title: '⏰ Biblical Timeline',
+                content: `
+                    <div class="max-w-2xl mx-auto text-center">
+                        <p class="text-lg text-gray-600 mb-6">Drag the events to arrange them in chronological order!</p>
+                        <div class="space-y-3 mb-6" id="timeline-events">
+                            ${shuffledEvents.map((event, index) => `
+                                <div class="timeline-event bg-purple-100 p-4 rounded-lg cursor-move hover:bg-purple-200 border-2 border-purple-200" 
+                                     draggable="true" ondragstart="dragTimelineStart(event)" data-order="${event.order}" data-index="${index}">
+                                    <span class="font-semibold">${event.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="space-y-4">
+                            <button onclick="checkTimeline()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                                ✓ Check Order
+                            </button>
+                            <button onclick="resetTimeline()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                                🔄 Shuffle Again
+                            </button>
+                        </div>
+                    </div>
+                `
+            };
+        }
+
+        function backToGames() {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById('games-section').classList.remove('hidden');
+        }
+
+        // Game interaction functions
+        let memoryFlippedCards = [];
+        let memoryScore = 0;
+        let memoryMoves = 0;
+        let bingoCalledWords = [];
+        let triviaCurrentQuestion = 0;
+        let triviaScore = 0;
+
+        function flipMemoryCard(card, symbol, index) {
+            if (card.dataset.flipped === 'true' || memoryFlippedCards.length >= 2) return;
+            
+            card.innerHTML = symbol;
+            card.style.backgroundColor = '#dbeafe';
+            card.dataset.flipped = 'true';
+            memoryFlippedCards.push({card, symbol, index});
+            
+            if (memoryFlippedCards.length === 2) {
+                memoryMoves++;
+                document.getElementById('memory-moves').textContent = memoryMoves;
+                
+                setTimeout(() => {
+                    if (memoryFlippedCards[0].symbol === memoryFlippedCards[1].symbol) {
+                        memoryScore++;
+                        document.getElementById('memory-score').textContent = memoryScore;
+                        memoryFlippedCards[0].card.style.backgroundColor = '#dcfce7';
+                        memoryFlippedCards[1].card.style.backgroundColor = '#dcfce7';
+                        showMessage("Great match! 🎉");
+                        
+                        if (memoryScore === 8) {
+                            showMessage("Congratulations! You completed the memory game! 🏆");
+                        }
+                    } else {
+                        memoryFlippedCards[0].card.innerHTML = '?';
+                        memoryFlippedCards[1].card.innerHTML = '?';
+                        memoryFlippedCards[0].card.style.backgroundColor = '#dbeafe';
+                        memoryFlippedCards[1].card.style.backgroundColor = '#dbeafe';
+                        memoryFlippedCards[0].card.dataset.flipped = 'false';
+                        memoryFlippedCards[1].card.dataset.flipped = 'false';
+                    }
+                    memoryFlippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function resetMemoryGame() {
+            memoryFlippedCards = [];
+            memoryScore = 0;
+            memoryMoves = 0;
+            document.getElementById('memory-score').textContent = '0';
+            document.getElementById('memory-moves').textContent = '0';
+            
+            document.querySelectorAll('.memory-card').forEach(card => {
+                card.innerHTML = '?';
+                card.style.backgroundColor = '#dbeafe';
+                card.dataset.flipped = 'false';
+            });
+            showMessage("New memory game started! 🧠");
+        }
+
+        function selectLetter(letterDiv) {
+            letterDiv.classList.toggle('bg-yellow-300');
+            letterDiv.classList.toggle('bg-gray-100');
+        }
+
+        function selectTriviaAnswer(button, isCorrect) {
+            const options = document.querySelectorAll('.trivia-option');
+            options.forEach(opt => {
+                opt.disabled = true;
+                opt.classList.remove('hover:bg-blue-50');
+            });
+            
+            if (isCorrect) {
+                button.classList.add('correct-answer');
+                triviaScore++;
+                showMessage("Correct! Well done! ✅");
+            } else {
+                button.classList.add('wrong-answer');
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct-answer');
+                    }
+                });
+                showMessage("Not quite right. The correct answer is highlighted. 📚");
+            }
+            
+            document.getElementById('trivia-score').textContent = triviaScore;
+            document.getElementById('trivia-next-btn').disabled = false;
+        }
+
+        function nextTriviaQuestion() {
+            const questions = [
+                { question: "Who was the first man created by God?", options: ["Adam", "Noah", "Moses", "Abraham"], correct: 0 },
+                { question: "How many disciples did Jesus have?", options: ["10", "11", "12", "13"], correct: 2 },
+                { question: "What did Jesus turn water into?", options: ["Milk", "Wine", "Juice", "Oil"], correct: 1 },
+                { question: "Who betrayed Jesus?", options: ["Peter", "John", "Judas", "Matthew"], correct: 2 },
+                { question: "On which day did God rest?", options: ["6th", "7th", "8th", "9th"], correct: 1 }
+            ];
+            
+            triviaCurrentQuestion = (triviaCurrentQuestion + 1) % questions.length;
+            const question = questions[triviaCurrentQuestion];
+            
+            document.getElementById('trivia-question').textContent = question.question;
+            document.getElementById('trivia-question-num').textContent = triviaCurrentQuestion + 1;
+            
+            const optionsContainer = document.getElementById('trivia-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'trivia-option w-full text-left p-4 border-2 rounded-lg hover:bg-blue-50 hover:border-blue-300';
+                button.textContent = option;
+                button.onclick = () => selectTriviaAnswer(button, index === question.correct);
+                optionsContainer.appendChild(button);
+            });
+            
+            document.getElementById('trivia-next-btn').disabled = true;
+        }
+
+        function markBingoCell(cell) {
+            cell.classList.toggle('bg-green-200');
+            cell.classList.toggle('bg-yellow-100');
+            cell.classList.toggle('border-green-400');
+            cell.classList.toggle('border-yellow-200');
+        }
+
+        function callBingoWord() {
+            const words = ['FAITH', 'HOPE', 'LOVE', 'PEACE', 'JOY', 'GRACE', 'MERCY', 'TRUTH', 'LIGHT', 'PRAYER', 'WISDOM', 'GLORY', 'PRAISE', 'SPIRIT', 'HEAVEN', 'BLESSED'];
+            const availableWords = words.filter(word => !bingoCalledWords.includes(word));
+            
+            if (availableWords.length === 0) {
+                showMessage("All words have been called! Start a new game! 🎉");
+                return;
+            }
+            
+            const calledWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            bingoCalledWords.push(calledWord);
+            document.getElementById('current-call').textContent = calledWord;
+            showMessage(`${calledWord} called! Mark it if you have it! 📢`);
+        }
+
+        function checkBingo() {
+            const markedCells = document.querySelectorAll('.bingo-cell.bg-green-200');
+            if (markedCells.length >= 4) {
+                showMessage("BINGO! Congratulations! 🎉🏆");
+                saveGameProgress();
+            } else {
+                showMessage("Not quite bingo yet. Keep playing! 🎲");
+            }
+        }
+
+        // Drag and drop functions for games
+        function dragStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.word);
+            event.dataTransfer.setData("text/html", event.target.outerHTML);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function dropWord(event) {
+            event.preventDefault();
+            const word = event.dataTransfer.getData("text/plain");
+            const builder = document.getElementById('verse-builder');
+            
+            if (builder.textContent.includes('Drop words here')) {
+                builder.innerHTML = '';
+            }
+            
+            const wordSpan = document.createElement('span');
+            wordSpan.textContent = word + ' ';
+            wordSpan.className = 'inline-block bg-blue-100 px-2 py-1 rounded mr-1 mb-1';
+            builder.appendChild(wordSpan);
+        }
+
+        function checkVerse(correctVerse) {
+            const builder = document.getElementById('verse-builder');
+            const builtVerse = builder.textContent.trim();
+            
+            if (builtVerse === correctVerse) {
+                showMessage("Perfect! You got the verse right! 🎉");
+                builder.style.backgroundColor = '#dcfce7';
+                saveGameProgress();
+            } else {
+                showMessage("Not quite right. Try rearranging the words! 🔤");
+                builder.style.backgroundColor = '#fef2f2';
+                setTimeout(() => {
+                    builder.style.backgroundColor = '';
+                }, 2000);
+            }
+        }
+
+        function resetScramble() {
+            const builder = document.getElementById('verse-builder');
+            builder.innerHTML = '<p class="text-gray-500">Drop words here to build the verse</p>';
+            builder.style.backgroundColor = '';
+            
+            // Reset word positions
+            const scrambledContainer = document.getElementById('scrambled-words');
+            const words = ['GOD', 'SO', 'LOVED', 'THE', 'WORLD'].sort(() => Math.random() - 0.5);
+            scrambledContainer.innerHTML = words.map(word => `
+                <div class="scramble-word bg-blue-100 px-4 py-2 rounded-lg cursor-move hover:bg-blue-200 font-semibold" 
+                     draggable="true" ondragstart="dragStart(event)" data-word="${word}">
+                    ${word}
+                </div>
+            `).join('');
+        }
+
+        function dragTimelineStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.order);
+            event.dataTransfer.setData("text/html", event.target.outerHTML);
+            event.dataTransfer.effectAllowed = "move";
+        }
+
+        function checkTimeline() {
+            const events = document.querySelectorAll('.timeline-event');
+            let isCorrect = true;
+            
+            events.forEach((event, index) => {
+                const expectedOrder = index + 1;
+                const actualOrder = parseInt(event.dataset.order);
+                
+                if (actualOrder === expectedOrder) {
+                    event.style.backgroundColor = '#dcfce7';
+                    event.style.borderColor = '#22c55e';
+                } else {
+                    event.style.backgroundColor = '#fef2f2';
+                    event.style.borderColor = '#ef4444';
+                    isCorrect = false;
+                }
+            });
+            
+            if (isCorrect) {
+                showMessage("Perfect timeline! You know your Bible history! 🏆");
+                saveGameProgress();
+            } else {
+                showMessage("Some events are out of order. Try rearranging them! ⏰");
+            }
+        }
+
+        function resetTimeline() {
+            const container = document.getElementById('timeline-events');
+            const events = [
+                { name: 'Creation of the World', order: 1 },
+                { name: 'Noah\'s Ark', order: 2 },
+                { name: 'Abraham\'s Call', order: 3 },
+                { name: 'Moses & the Exodus', order: 4 },
+                { name: 'David becomes King', order: 5 },
+                { name: 'Jesus\' Birth', order: 6 },
+                { name: 'Jesus\' Crucifixion', order: 7 },
+                { name: 'Jesus\' Resurrection', order: 8 }
+            ];
+            const shuffledEvents = [...events].sort(() => Math.random() - 0.5);
+            
+            container.innerHTML = shuffledEvents.map((event, index) => `
+                <div class="timeline-event bg-purple-100 p-4 rounded-lg cursor-move hover:bg-purple-200 border-2 border-purple-200" 
+                     draggable="true" ondragstart="dragTimelineStart(event)" data-order="${event.order}" data-index="${index}">
+                    <span class="font-semibold">${event.name}</span>
+                </div>
+            `).join('');
+        }
+
+        // Donation Functions
+        function setAmount(amount) {
+            document.getElementById('donation-amount').value = amount;
+        }
+
+        async function recordDonation() {
+            const amount = document.getElementById('donation-amount').value;
+            const name = document.getElementById('donor-name').value;
+            const prayer = document.getElementById('prayer-request').value;
+            
+            if (!amount) {
+                showMessage("Please enter a donation amount.");
+                return;
+            }
+            
+            if (window.dataSdk && currentData.length < 999) {
+                const donationRecord = {
+                    type: 'donation',
+                    amount: parseFloat(amount),
+                    donor_name: name || 'Anonymous',
+                    prayer_request: prayer || '',
+                    created_at: new Date().toISOString()
+                };
+                
+                const result = await window.dataSdk.create(donationRecord);
+                if (result.isOk) {
+                    showMessage(`Thank you for your generous heart! ₦${amount} donation intent recorded. 🙏`);
+                    document.getElementById('donation-amount').value = '';
+                    document.getElementById('donor-name').value = '';
+                    document.getElementById('prayer-request').value = '';
+                } else {
+                    showMessage("Unable to record donation. Please try again.");
+                }
+            } else if (currentData.length >= 999) {
+                showMessage("Storage limit reached. Please contact support.");
+            } else {
+                showMessage(`Thank you for your generous heart! ₦${amount} donation intent noted. 🙏`);
+            }
+        }
+
+        // YouTube Video Functions
+        function openYouTubeVideo(videoId, title) {
+            const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
+            
+            // Save progress that user clicked to watch
+            saveProgress('video_clicked', title);
+            showMessage(`🎥 Opening "${title}" on YouTube! Enjoy your Bible study! 📚`);
+        }
+
+        // Utility Functions
+        async function saveProgress(type, value) {
+            if (window.dataSdk && currentData.length < 999) {
+                const progressRecord = {
+                    type: type,
+                    value: value,
+                    created_at: new Date().toISOString()
+                };
+                
+                await window.dataSdk.create(progressRecord);
+            }
+        }
+
+        function saveGameProgress() {
+            saveProgress('game_score', 1);
+        }
+
+        function updateProgress() {
+            const studyCount = currentData.filter(item => item.type === 'reading_progress').length;
+            const quizCount = currentData.filter(item => item.type === 'quiz_score').reduce((sum, item) => sum + (item.value || 0), 0);
+            const gameCount = currentData.filter(item => item.type === 'game_score').length;
+            const verseCount = currentData.filter(item => item.type === 'favorite_verse').length;
+            
+            document.getElementById('study-progress').textContent = studyCount;
+            document.getElementById('quiz-progress').textContent = quizCount;
+            document.getElementById('game-progress').textContent = gameCount;
+            document.getElementById('verse-progress').textContent = verseCount;
+        }
+
+        function showMessage(message) {
+            // Create toast message
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSDKs();
+            loadBooks();
+            
+            // Set random daily verse
+            const randomVerse = dailyVerses[Math.floor(Math.random() * dailyVerses.length)];
+            document.getElementById('daily-verse').textContent = randomVerse.text;
+            document.getElementById('verse-reference').textContent = randomVerse.reference;
+            
+            // Show study section by default
+            showSection('study');
+
+            // Add event listener for custom goal selection
+            const mainGoalSelect = document.getElementById('main-goal');
+            if (mainGoalSelect) {
+                mainGoalSelect.addEventListener('change', function() {
+                    const customInput = document.getElementById('custom-goal-input');
+                    if (this.value === 'custom') {
+                        customInput.classList.remove('hidden');
+                    } else {
+                        customInput.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'994915f9b27a9ec9',t:'MTc2MTQ3MjYwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
